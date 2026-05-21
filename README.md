@@ -1,13 +1,14 @@
 # leonardo-hpc-survival-guide
 
 Leonardo HPC Deep Learning & Vision Research Cheatsheet
+
 A concise, battle-tested engineering guide for running heavy Deep Learning, Video Understanding, and Large Multimodal Model (LMM) inference pipelines on the CINECA Leonardo Supercomputer (NVIDIA A100 Cluster) without container overheads.
 
 Designed for first-time HPC users and computer vision researchers shifting from local GPUs to enterprise-level HPC infrastructure.
 
 ---
 
-> ⚠️ **Important:** This guide is under continuous revision. All the info below was tested on **ISCRA CINECA Leonardo A100**.
+> ⚠️ **Important:** This guide is under continuous revision. All the info below was tested on **ISCRA CINECA Leonardo A100** through Win11/WSL and Linux/Ubuntu 26.04 LTS.
 
 ---
 
@@ -57,7 +58,7 @@ tail -f logs/your_job_id.out
 
 ### 🪄 Pro-Tip: SSH Configuration for One-Command Automation
 
-To bypass manual tünel management and login directly using a single `ssh leonardo` command, append the following snippet to your local machine's `~/.ssh/config` file:
+To bypass manual tunnel management and login directly using a single `ssh leonardo` command, append the following snippet to your local machine's `~/.ssh/config` file:
 
 ```
 Host leonardo
@@ -110,17 +111,17 @@ step ssh login username --provisioner cineca-hpc
 
 (Complete the CINECA OTP/Password challenge if prompted).
 
-2. Execute Reverse rsync to Pull Data Down: Navigate into your target local directory (`cd ~/socialiq_trial/temporal-si`) and ignite the data sync:
+2. Execute Reverse rsync to Pull Data Down: Navigate into your target local directory (`cd ~/your_local_target_dir`) and ignite the data sync:
 
 ```bash
-rsync -avP -e "ssh -o StrictHostKeyChecking=no" username@login.leonardo.cineca.it:/leonardo_scratch/large/userexternal/username/socialiq_scene_processing/ .
+rsync -avP -e "ssh -o StrictHostKeyChecking=no" username@login.leonardo.cineca.it:/leonardo_scratch/large/userexternal/username/your_project_dir/ .
 ```
 
 ### 💡 Deep Dive: Decoding the rsync Flags
 
 - **`-avP`**: Transfers files in archive mode (`a`), verbosely displays logs (`v`), and provides a real-time progress bar (`P`). Most importantly, if the connection drops mid-way through a multi-gigabyte transfer, re-running this command resumes precisely where it left off, unlike `scp` which restarts from scratch.
 - **`-e "ssh -o StrictHostKeyChecking=no"`**: Completely bypasses host key fingerprint mismatches or handshake locks caused by remote network rotations.
-- **📂 Trailing Slash on Source (`/`)**: Appending `/` to the end of the remote path (`.../socialiq_scene_processing/`) ensures that only the *contents* of the folder are copied, preventing unwanted nested folder structures.
+- **📂 Trailing Slash on Source (`/`)**: Appending `/` to the end of the remote path (`.../your_project_dir/`) ensures that only the *contents* of the folder are copied, preventing unwanted nested folder structures.
 - **📍 Current Directory Target (`.`)**: The trailing dot instructs the engine to clone everything directly into your current working directory on the local machine.
 
 ---
@@ -210,7 +211,7 @@ Create a `job.sh` file inside your project workspace and configure the block bel
 
 ```bash
 #!/bin/bash
-#SBATCH --job-name=socialiq_inference   # Descriptive name of your pipeline
+#SBATCH --job-name=your_job_name        # Descriptive name of your pipeline
 #SBATCH --nodes=1                       # Target single-node computation
 #SBATCH --ntasks-per-node=1             # Main execution process count
 #SBATCH --gres=gpu:4                    # Request all 4 NVIDIA A100 GPUs on the node
@@ -259,7 +260,7 @@ Quick reference for navigating the storage partitions and managing your heavy ma
 | Command | Operational Purpose | Context / Best Practice |
 |---------|--------------------|-----------------------|
 | `cd $SCRATCH` | 📂 Warp straight to high-speed scratch space. | Always execute this immediately after logging in. Never run your training or processing loops in `$HOME`. |
-| `rm -rf <dir_name>` | 🧹 Absolute and permanent directory purge. | Use with caution to clean up failed duman testi trials, cached frame remnants, or conflicting lock files before a major `sbatch` run. |
+| `rm -rf <dir_name>` | 🧹 Absolute and permanent directory purge. | Use with caution to clean up failed smoke test trials, cached frame remnants, or conflicting lock files before a major `sbatch` run. |
 | `sbatch job.sh` | 🚀 Submit a batch script to the queue. | Dispatches your heavy execution pipeline to the background allocation nodes (e.g., NVIDIA A100 nodes). |
 | `squeue -u username` | 📋 Monitor your active and pending jobs. | Check this to ensure your submitted cluster job status is officially set to `R` (Running) or to see your queue priority. |
 | `tail -n 30 logs_<ID>.out` | 🔍 Peek at the trailing edge of execution logs. | Essential for structural diagnostics, confirming active checkpointing, or debugging early script failures. |
@@ -271,5 +272,5 @@ Quick reference for navigating the storage partitions and managing your heavy ma
 
 To deep dive into Leonardo's custom system libraries, environment profiles, and standard network/storage architecture policies, consult the official resources below:
 
-- 📖 [CINECA HPC Documentation] – Official platform infrastructure, partition specifications, and baseline Slurm orchestration rules.
-- ⚡ [Best Practice Guide to Running AI Workloads on Leonardo CINECA] – European HPC Application Support Portal guide for optimizing native non-containerized distributed training/inference loops.
+- 📖 [CINECA HPC Documentation](https://docs.hpc.cineca.it/index.html) – Official platform infrastructure, partition specifications, and baseline Slurm orchestration rules.
+- ⚡ [Best Practice Guide to Running AI Workloads on Leonardo CINECA](https://eurohpcsupport.eu/best-practice/best-practice-guide-to-running-ai-workloads-on-leonardo-cineca/) – European HPC Application Support Portal guide for optimizing native non-containerized distributed training/inference loops.
